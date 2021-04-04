@@ -38,15 +38,14 @@ class Drawing:
         self.scale = min(self.size[0], self.size[1])
         self.offset = ((self.size[0] / 2) - (self.scale / 2),
                        (self.size[1] / 2) - (self.scale / 2))
-
         self.surface.fill(Color(0, 0, 0))
 
-    def Qix_update(self, pos: Vector2, facing: float) -> None:
+    def qix_update(self, pos: Vector2, facing: float) -> None:
         for i in range(len(self.prev_qix) - 1):
             self.prev_qix[i] = self.prev_qix[i + 1]
         self.prev_qix[-1] = (pos, facing)
 
-    def Qix(self, pos: Vector2, facing: float, size: float) -> None:
+    def qix(self, pos: Vector2, facing: float, size: float) -> None:
         global screen
 
         draw_color = (255, 0, 0)
@@ -88,7 +87,7 @@ class Drawing:
             aaline(self.surface, draw_color, b, l, 2)
             aaline(self.surface, draw_color, l, t, 2)
 
-    def Sparx(self, pos: Vector2, facing: float, size: float) -> None:
+    def sparx(self, pos: Vector2, facing: float, size: float) -> None:
         max_delta = int(size / 2 * self.scale)
         pos = pos * self.scale + Vector2(self.offset)
         for _ in range(0, self.scale // 4):

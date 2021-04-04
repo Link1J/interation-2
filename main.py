@@ -1,6 +1,7 @@
 from timetracker import TimeTracker
 from drawing import Vector2, drawing
 from debug import debug
+from Sparx import Sparx
 
 import time
 import math
@@ -10,6 +11,8 @@ import pygame
 # import antigravity
 
 running = True
+sparx1 = Sparx(0.515, 0.1, 0.005, False)
+sparx2 = Sparx(0.485, 0.1, -0.005, True)
 
 
 def bound(pos: Vector2) -> None:
@@ -36,6 +39,9 @@ def game_update() -> None:
 
     global count
 
+    global sparx1
+    global sparx2
+
     drawing.setup_frame()
 
     if count % 4 == 0:
@@ -45,12 +51,18 @@ def game_update() -> None:
         ply_pos = ply_pos + ply_mov
         bound(ply_pos)
 
-        drawing.Qix_update(qix_pos, angle(qix_mov))
+        drawing.qix_update(qix_pos, angle(qix_mov))
         qix_mov.rotate_ip(random.randint(0, 20))
 
-    drawing.Qix(qix_pos, angle(qix_mov), 0.1)
+    drawing.qix(qix_pos, angle(qix_mov), 0.1)
     drawing.Player(ply_pos, angle(ply_mov), 0.1)
-    drawing.Sparx(Vector2(0.5, 0.5), 0, 0.1)
+
+    #drawing.sparx(Vector2(0.515, 0.1), 0, 0.03)
+    #drawing.sparx(Vector2(0.485, 0.1), 0, 0.03)
+    sparx1.draw(0, 0.03)
+    sparx2.draw(0, 0.03)
+    sparx1.move()
+    sparx2.move()
 
     drawing.Borders()
 
@@ -72,12 +84,14 @@ def main():
 
     pygame.init()
     pygame.display.set_caption("Qix")
-    screen = pygame.display.set_mode((800, 800), pygame.RESIZABLE)
+    screen = pygame.display.set_mode((500, 500), pygame.RESIZABLE)
 
     gameUpdate = TimeTracker(time.perf_counter_ns)
 
     drawing.set_surface(screen)
     debug.set_surface(screen)
+    sparx1.set_surface(screen)
+    sparx2.set_surface(screen)
 
     qix_pos = Vector2(0.25, 0.5)
     qix_mov = Vector2(0.01, 0.0)
