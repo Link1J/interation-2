@@ -41,13 +41,24 @@ class Drawing:
         self.surface.fill(Color(0, 0, 0))
 
     def qix_update(self, pos: Vector2, facing: float) -> None:
+        """
+        Updates the position of the Qix
+        :param pos: Current position
+        :param facing: Facing direction
+        :return: None
+        """
         for i in range(len(self.prev_qix) - 1):
             self.prev_qix[i] = self.prev_qix[i + 1]
         self.prev_qix[-1] = (pos, facing)
 
     def qix(self, pos: Vector2, facing: float, size: float) -> None:
-        global screen
-
+        """
+        Draws the Qix
+        :param pos: Does nothing (Current position)
+        :param facing: Does nothing (Facing direction)
+        :param size: Size of object
+        :return: None
+        """
         draw_color = (255, 0, 0)
         delta = Vector2(0, size / 2)
 
@@ -57,7 +68,14 @@ class Drawing:
             end = (pos - offset) * self.scale + Vector2(self.offset)
             pygame.draw.aaline(self.surface, draw_color, start, end, 2)
 
-    def Player(self, pos: Vector2, facing: float, size: float) -> None:
+    def player(self, pos: Vector2, facing: float, size: float) -> None:
+        """
+        Draws the Player
+        :param pos: Current position
+        :param facing: Facing direction
+        :param size: Size of object
+        :return: None
+        """
         delta = Vector2(0, size / 2)
         draw_color = (128, 128, 128)
 
@@ -88,6 +106,13 @@ class Drawing:
             aaline(self.surface, draw_color, l, t, 2)
 
     def sparx(self, pos: Vector2, facing: float, size: float) -> None:
+        """
+        Draws the sparx
+        :param pos: Current position
+        :param facing: Does nothing (Facing direction)
+        :param size: Size of object
+        :return: None
+        """
         max_delta = int(size / 2 * self.scale)
         pos = pos * self.scale + Vector2(self.offset)
         for _ in range(0, self.scale // 4):
@@ -102,8 +127,6 @@ class Drawing:
         pass
 
     def Borders(self) -> None:
-        global screen
-
         l = int(self.offset[0])
         r = self.size[0] - l - 1
         t = int(self.offset[1])
