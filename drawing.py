@@ -1,9 +1,10 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union
 from enum import Enum, unique
 
 from pygame import Surface, Color
 from pygame.math import Vector2
 from pygame.draw import aaline
+from pygame.font import Font
 
 from random import randint, uniform
 from math import cos, sin, sqrt
@@ -25,20 +26,88 @@ class Drawing:
     offset: Tuple[float, float]
     player_shape: PlayerShape
     surface: Surface
+    font: Font
+
+    score: Surface
+    filled: Surface
+    required: Surface
+    filled_text: Surface
+    required_text: Surface
+    score_text: Surface
+    space_size: int
+
+    # Cache values (DO NOT USE)
+    score_value: int
+    # Cache values (DO NOT USE)
+    filled_value: int
+    # Cache values (DO NOT USE)
+    required_value: int
 
     def __init__(self) -> None:
         self.player_shape = PlayerShape.Diamond
         self.prev_qix = [(Vector2(-100, -100), 0.) for _ in range(10)]
+        self.surface = None
+        self.size = (0, 0)
+        self.score_value = 0
+        self.filled_value = 0
+        self.required_value = 0
 
     def set_surface(self, surface: Surface) -> None:
+        size = surface.get_size()
+        scale = min(size[0], size[1])
+
         self.surface = surface
 
+        self.font = Font("PressStart2P.ttf", int(scale * 0.03))
+        self.required_text = self.font.render(
+            "Required", True, (255, 255, 255))
+        self.filled_text = self.font.render("Filled", True, (255, 255, 255))
+        self.score_text = self.font.render("Score", True, (255, 255, 255))
+        self.space_size = self.font.render(
+            " ", True, (255, 255, 255)).get_width()
+
+        self.update_required(self.score_value)
+        self.update_filled(self.filled_value)
+        self.update_score(self.required_value)
+
     def setup_frame(self) -> None:
+        if self.size != self.surface.get_size():
+            self.set_surface(self.surface)
         self.size = self.surface.get_size()
-        self.scale = min(self.size[0], self.size[1])
+        self.full_scale = min(self.size[0], self.size[1])
+        self.scale = int(self.full_scale * 0.84)
         self.offset = ((self.size[0] / 2) - (self.scale / 2),
                        (self.size[1] / 2) - (self.scale / 2))
+        self.full_offset = ((self.size[0] / 2) - (self.full_scale / 2),
+                            (self.size[1] / 2) - (self.full_scale / 2))
         self.surface.fill(Color(0, 0, 0))
+
+    def update_required(self, value: Union[int, float]) -> None:
+        """
+        Updates the texture for min required filled
+        :param value: min required filled
+        :return: None
+        """
+        self.required = self.font.render(str(value) + "%", True, (255, 255, 255))
+        self.required_value = value
+
+    def update_filled(self, value: Union[int, float]) -> None:
+        """
+        Updates the texture for filled
+        :param value: filled
+        :return: None
+        """
+        self.filled = self.font.render(str(value) + "%", True, (255, 255, 255))
+        self.filled_value = value
+
+    def update_score(self, value: int) -> None:
+        """
+        Updates the texture for score
+        :param value: score
+        :return: None
+        """
+        self.score = self.font.render(str(value), True, (255, 255, 255))
+        self.score_value = value
 
     def qix_update(self, pos: Vector2, facing: float) -> None:
         """
@@ -126,16 +195,48 @@ class Drawing:
 
         pass
 
-    def Borders(self) -> None:
+    def borders(self) -> None:
         l = int(self.offset[0])
-        r = self.size[0] - l - 1
+        r = int(self.size[0] - l - 1)
         t = int(self.offset[1])
-        b = self.size[1] - t - 1
+        b = int(self.size[1] - t - 1)
 
         pygame.gfxdraw.line(self.surface, l, t, l, b, (255, 255, 255))
         pygame.gfxdraw.line(self.surface, r, t, r, b, (255, 255, 255))
         pygame.gfxdraw.line(self.surface, l, t, r, t, (255, 255, 255))
         pygame.gfxdraw.line(self.surface, l, b, r, b, (255, 255, 255))
+
+    def end(self) -> None:
+        rect = self.required_text.get_rect()
+        rect.move_ip(self.full_offset[0] + self.full_scale -
+                     rect.width - self.space_size, self.full_scale * 0.01)
+        self.surface.blit(self.required_text, rect)
+        prev_rect = rect
+
+        rect = self.required.get_rect()
+        rect.move_ip(prev_rect.x + prev_rect.width/2, prev_rect.bottom)
+        rect.move_ip(-(rect.width/2), 0)
+        self.surface.blit(self.required, rect)
+
+        rect = self.filled_text.get_rect()
+        rect.move_ip(prev_rect.x - self.space_size, prev_rect.top)
+        rect.move_ip(-rect.width, 0)
+        self.surface.blit(self.filled_text, rect)
+        prev_rect = rect
+
+        rect = self.filled.get_rect()
+        rect.move_ip(prev_rect.x + prev_rect.width/2, prev_rect.bottom)
+        rect.move_ip(-(rect.width/2), 0)
+        self.surface.blit(self.filled, rect)
+
+        rect = self.score_text.get_rect()
+        rect.move_ip(self.full_offset[0] + self.space_size, self.full_scale * 0.01)
+        self.surface.blit(self.score_text, rect)
+        prev_rect = rect
+
+        rect = self.score.get_rect()
+        rect.move_ip(prev_rect.x, prev_rect.bottom)
+        self.surface.blit(self.score, rect)
 
 
 drawing = Drawing()

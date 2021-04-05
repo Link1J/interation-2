@@ -54,19 +54,19 @@ def game_update() -> None:
         drawing.qix_update(qix_pos, angle(qix_mov))
         qix_mov.rotate_ip(random.randint(0, 20))
 
-    drawing.qix(qix_pos, angle(qix_mov), 0.1)
-    drawing.Player(ply_pos, angle(ply_mov), 0.1)
+    drawing.borders()
 
-    #drawing.sparx(Vector2(0.515, 0.1), 0, 0.03)
-    #drawing.sparx(Vector2(0.485, 0.1), 0, 0.03)
+    drawing.qix(qix_pos, angle(qix_mov), 0.1)
+    drawing.player(ply_pos, angle(ply_mov), 0.1)
+
     sparx1.draw(0, 0.03)
     sparx2.draw(0, 0.03)
     sparx1.move()
     sparx2.move()
 
-    drawing.Borders()
+    drawing.end()
 
-    debug.draw_tps()
+    #debug.draw_tps()
 
     pygame.display.flip()
 
