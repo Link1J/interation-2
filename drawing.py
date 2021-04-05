@@ -66,9 +66,9 @@ class Drawing:
         self.space_size = self.font.render(
             " ", True, (255, 255, 255)).get_width()
 
-        self.update_required(self.score_value)
+        self.update_required(self.required_value)
         self.update_filled(self.filled_value)
-        self.update_score(self.required_value)
+        self.update_score(self.score_value)
 
     def setup_frame(self) -> None:
         if self.size != self.surface.get_size():
