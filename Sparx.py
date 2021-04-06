@@ -23,10 +23,10 @@ class Sparx:
         Sets up the lines for the sparx to move along (made for testing purpose).
         Should be replaced with inner_list created by the player.
         """
-        line1 = Line([(0.1, 0.1), (0.9, 0.1)])          # Top line
-        line2 = Line([(0.9, 0.1), (0.9, 0.9)])          # Right line
-        line3 = Line([(0.9, 0.9), (0.1, 0.9)])          # Bottom line
-        line4 = Line([(0.1, 0.9), (0.1, 0.1)])          # Left line
+        line1 = Line([(0.0, 0.0), (1.0, 0.0)])          # Top line
+        line2 = Line([(1.0, 0.0), (1.0, 1.0)])          # Right line
+        line3 = Line([(1.0, 1.0), (0.0, 1.0)])          # Bottom line
+        line4 = Line([(0.0, 1.0), (0.0, 0.0)])          # Left line
         self.inner_list.insert_end(line1)
         self.inner_list.insert_end(line2)
         self.inner_list.insert_end(line3)
@@ -36,16 +36,13 @@ class Sparx:
     def set_surface(self, win: Surface) -> None:
         self.win = win
 
-    def draw(self, facing: float, size: float) -> None:
+    def draw(self) -> None:
         """
         Calls drawing.sparx from drawing.py
         This is done so that Sparx object contains the method 'draw'
-        :param facing: What is facing param for?
-        :param size: Size of the Sparx
         :return: None
         """
-        pos = Vector2(self.x, self.y)
-        drawing.sparx(pos, facing, size)
+        drawing.sparx(Vector2(self.x, self.y), 0, 0.03)
 
     def move(self) -> None:
         """

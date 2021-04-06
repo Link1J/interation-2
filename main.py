@@ -11,8 +11,8 @@ import pygame
 # import antigravity
 
 running = True
-sparx1 = Sparx(0.515, 0.1, 0.005, False)
-sparx2 = Sparx(0.485, 0.1, -0.005, True)
+sparx1 = Sparx(0.515, 0, 0.005, False)
+sparx2 = Sparx(0.485, 0, -0.005, True)
 
 
 def bound(pos: Vector2) -> None:
@@ -51,16 +51,15 @@ def game_update() -> None:
         ply_pos = ply_pos + ply_mov
         bound(ply_pos)
 
-        drawing.qix_update(qix_pos, angle(qix_mov))
         qix_mov.rotate_ip(random.randint(0, 20))
 
     drawing.borders()
 
     drawing.qix(qix_pos, angle(qix_mov), 0.1)
-    drawing.player(ply_pos, angle(ply_mov), 0.1)
+    drawing.player(ply_pos, angle(ply_mov), 0.03)
 
-    sparx1.draw(0, 0.03)
-    sparx2.draw(0, 0.03)
+    sparx1.draw()
+    sparx2.draw()
     sparx1.move()
     sparx2.move()
 
@@ -96,7 +95,7 @@ def main():
     qix_pos = Vector2(0.25, 0.5)
     qix_mov = Vector2(0.01, 0.0)
 
-    ply_pos = Vector2(0.5, 0.5)
+    ply_pos = Vector2(0.6, 0.0)
     ply_mov = Vector2(random.uniform(0, 0.01), random.uniform(0, 0.01))
 
     count = 0

@@ -20,7 +20,7 @@ class PlayerShape(Enum):
 
 
 class Drawing:
-    prev_qix: List[Tuple[Vector2, float]]
+    prev_qix: List[Tuple[Vector2, float, Color]]
     size: Tuple[int, int]
     scale: int
     offset: Tuple[float, float]
@@ -45,7 +45,7 @@ class Drawing:
 
     def __init__(self) -> None:
         self.player_shape = PlayerShape.Diamond
-        self.prev_qix = [(Vector2(-100, -100), 0.) for _ in range(10)]
+        self.prev_qix = [(Vector2(-100, -100), 0., Color(0,255,0)) for _ in range(10)]
         self.surface = None
         self.size = (0, 0)
         self.score_value = 0
@@ -75,7 +75,7 @@ class Drawing:
             self.set_surface(self.surface)
         self.size = self.surface.get_size()
         self.full_scale = min(self.size[0], self.size[1])
-        self.scale = int(self.full_scale * 0.84)
+        self.scale = int(self.full_scale * 0.8)
         self.offset = ((self.size[0] / 2) - (self.scale / 2),
                        (self.size[1] / 2) - (self.scale / 2))
         self.full_offset = ((self.size[0] / 2) - (self.full_scale / 2),
@@ -88,7 +88,8 @@ class Drawing:
         :param value: min required filled
         :return: None
         """
-        self.required = self.font.render(str(value) + "%", True, (255, 255, 255))
+        self.required = self.font.render(
+            str(value) + "%", True, (255, 255, 255))
         self.required_value = value
 
     def update_filled(self, value: Union[int, float]) -> None:
@@ -110,28 +111,30 @@ class Drawing:
         self.score_value = value
 
     def qix_update(self, pos: Vector2, facing: float) -> None:
-        """
-        Updates the position of the Qix
-        :param pos: Current position
-        :param facing: Facing direction
-        :return: None
-        """
         for i in range(len(self.prev_qix) - 1):
             self.prev_qix[i] = self.prev_qix[i + 1]
-        self.prev_qix[-1] = (pos, facing)
+        self.prev_qix[-1] = (pos, facing, Color(255, 0, 0))
 
     def qix(self, pos: Vector2, facing: float, size: float) -> None:
         """
         Draws the Qix
-        :param pos: Does nothing (Current position)
-        :param facing: Does nothing (Facing direction)
+        :param pos: Current position
+        :param facing: Facing direction
         :param size: Size of object
         :return: None
         """
         draw_color = (255, 0, 0)
         delta = Vector2(0, size / 2)
 
-        for (pos, facing) in self.prev_qix:
+        if pos.distance_to(self.prev_qix[-1][0]) >= 0.01 or facing - self.prev_qix[-1][1] > 0.01 or facing - self.prev_qix[-1][1] < -0.01:
+            self.qix_update(pos, facing)
+
+        offset = delta.rotate(facing)
+        start = (pos + offset) * self.scale + Vector2(self.offset)
+        end = (pos - offset) * self.scale + Vector2(self.offset)
+        pygame.draw.aaline(self.surface, draw_color, start, end, 2)
+
+        for (pos, facing, draw_color) in self.prev_qix:
             offset = delta.rotate(facing)
             start = (pos + offset) * self.scale + Vector2(self.offset)
             end = (pos - offset) * self.scale + Vector2(self.offset)
@@ -145,7 +148,7 @@ class Drawing:
         :param size: Size of object
         :return: None
         """
-        delta = Vector2(0, size / 2)
+        delta = Vector2(0, size)
         draw_color = (128, 128, 128)
 
         if self.player_shape == PlayerShape.Arrow:
@@ -183,13 +186,13 @@ class Drawing:
         :return: None
         """
         max_delta = int(size / 2 * self.scale)
-        pos = pos * self.scale + Vector2(self.offset)
-        for _ in range(0, self.scale // 4):
+        pos = pos * self.scale + Vector2(self.offset) + Vector2(1, 0)
+        for _ in range(0, self.scale // 5):
             r = randint(128, 255)
             g = randint(0, 0xA5)
-            dr = max_delta * sqrt(uniform(0, 1))
-            dt = max_delta * sqrt(uniform(0, 1))
-            x = int(pos.x + 1 + dr * cos(dt))
+            dr = max_delta * sqrt(uniform(0, 4))
+            dt = max_delta * sqrt(uniform(0, 4))
+            x = int(pos.x + dr * cos(dt))
             y = int(pos.y + dr * sin(dt))
             self.surface.set_at((x, y), pygame.Color(r, g, 0))
 
@@ -230,7 +233,8 @@ class Drawing:
         self.surface.blit(self.filled, rect)
 
         rect = self.score_text.get_rect()
-        rect.move_ip(self.full_offset[0] + self.space_size, self.full_scale * 0.01)
+        rect.move_ip(self.full_offset[0] +
+                     self.space_size, self.full_scale * 0.01)
         self.surface.blit(self.score_text, rect)
         prev_rect = rect
 
