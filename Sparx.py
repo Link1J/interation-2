@@ -42,7 +42,7 @@ class Sparx:
         This is done so that Sparx object contains the method 'draw'
         :return: None
         """
-        drawing.sparx(Vector2(self.x, self.y), 0, 0.03)
+        drawing.sparx(Vector2(self.x, self.y), 0, 0.02)
 
     def move(self) -> None:
         """
