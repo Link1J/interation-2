@@ -1,73 +1,105 @@
 import pygame
 
-#Gets points to make polygons with. This function will be deleted when getPolyPoints works 
-def getCorrectPoints(points):
-	#Left to right straight across
-	if (points[0][0] == 0 and points[-1][0] == screenWidth):
-		points.append((screenWidth, screenHeight))
-		points.append((0, screenHeight))
-		return points
-	#Right to left straight across 
-	elif (points[0][0] == screenWidth and points[-1][0] == 0):
-		points.append((0, screenHeight))
-		points.append((screenWidth, screenHeight))
-		return points
-	#Up to down straight across 
-	elif (points[0][1] == 0 and points[-1][1] == screenHeight):
-		points.append((screenWidth, screenHeight))
-		points.append((screenWidth, 0))
-		return points
-	#Down to up straight across 
-	elif (points[0][1] == screenHeight and points[-1][1] == 0):
-		points.append((screenWidth, 0))
-		points.append((screenWidth, screenHeight))
-		return points
-	#Same wall 
-	elif points[0][0] == points[-1][0] or points[0][1] == points[-1][1]:
-		print("Same")
-		#Same wall 
-		return points
-	#When ended on x side wall (and didn't go into same wall if) on corner
-	elif points[-1][0] == 0 or points[-1][0] == screenWidth:
-		print("Corner")
-		points.append((points[-1][0], points[0][1]))
-		return points
-	#When ended on y side wall (and didn't go into same wall if) on corner
-	elif points[-1][1] == 0 or points[-1][1] == screenHeight:
-		points.append((points[0][0], points[-1][1]))
-		return points
-	else:
-		print("this one")
-		return []
+def checkIfCrossedLineForPoly(playerPosition, lines, linesAllowed):
+	for line in lines:
+		if (line[2], line[3]) in linesAllowed:
+			continue
+		if playerPosition[0] >= min(line[3][0], line[2][0]) and playerPosition[0] <= max(line[3][0], line[2][0]):
+			if playerPosition[1] >= min(line[3][1], line[2][1]) and playerPosition[1] <= max(line[3][1], line[2][1]):
+				return True, line[2], line[3]
+	if playerPosition[0] <= 0:
+		if not ((0, 0), (0, screenHeight)) in linesAllowed:
+			return True, (0, 0), (0, screenHeight)
+	if playerPosition[0] >= screenWidth:
+		if not ((screenWidth, 0), (screenWidth, screenHeight)) in linesAllowed:
+			return True, (screenWidth, 0), (screenWidth, screenHeight)
+	if playerPosition[1] <= 0:
+		if not ((0, 0), (screenWidth, 0)) in linesAllowed:
+			return True, (0, 0), (screenWidth, 0)
+	if playerPosition[1] >= screenHeight:
+		if not ((0, screenHeight), (screenWidth, screenHeight)) in linesAllowed:
+			return True, (0, screenHeight), (screenWidth, screenHeight)
+	
+	return False, 0, 0
 
-#def getPolyPoints(points, lines): 
+#Simulates an approach from a starting playerposition in a given direction until it hits a line or the edge 
+#Returns the distance the player is from a line or the edge and the point at which they connect in that direction
+def simulateApproachForPoly(playerPosition, lines, direction, linesAllowed):
+	notHitLine = True
+	simulateX = playerPosition[0]
+	simulateY = playerPosition[1]
+	while notHitLine:
+		crossedLine, startLine, endLine = checkIfCrossedLineForPoly((simulateX, simulateY), lines, linesAllowed)
+		if crossedLine:
+			return (simulateX, simulateY), startLine, endLine
+		simulateX += direction[0]
+		simulateY += direction[1]
+	return (simulateX, simulateY), startLine, endLine
+
+def getPolyPoints(points, lines, lastDirection): 
 	#First get direction of trace 
 	#Then follow that direction until it hits a line
 	#Add point at new spot 
 	#Turn in new direction 
 	#Repeat until found first point 
+	if lastDirection == "up":
+		direction = (0, -1)
+	elif lastDirection == "down":
+		direction = (0, 1)
+	elif lastDirection == "right":
+		direction = (1, 0)
+	elif lastDirection == "left":
+		direction = (-1, 0)
+	newPoint = (-500, -500)
+	linesAllowed = []
+	while not newPoint == points[0]:
+		newPoint, lineStart, lineEnd = simulateApproachForPoly(points[-1], lines, direction, linesAllowed)
+		points.append(newPoint)
+		if not (lineStart, lineEnd) in linesAllowed:
+			linesAllowed.append((lineStart, lineEnd))
+		if lineEnd[0] == lineStart[0]:
+			if points[0][1] < newPoint[1]:
+				direction = (0, -1)
+			else:
+				direction = (0, 1) 
+		else:
+			if points[0][0] < newPoint[0]:
+				direction = (-1, 0)
+			else:
+				direction = (1, 0)
+	return points
 
 #Since the player's x, y is offset by its radius we have to adjust the first and last polygon points
 def fixPoints(points):
-	if points[0][0] == 5:
-		points[0] = (points[0][0] - 5, points[0][1])
-	elif points[0][0] + playerRadius == screenWidth: 
-		points[0] = (points[0][0] + 5, points[0][1])
-	elif points[0][1] == 5:
-		points[0] = (points[0][0], points[0][1] - 5)
-	elif points[0][1] + playerRadius == screenHeight: 
-		points[0] = (points[0][0], points[0][1] + 5)
-
-	if points[-1][0] == 5:
-		points[-1] = (points[-1][0] - 5, points[-1][1])
-	elif points[-1][0] + playerRadius == screenWidth: 
-		points[-1] = (points[-1][0] + 5, points[-1][1])
-	elif points[-1][1] == 5:
-		points[-1] = (points[-1][0], points[-1][1] - 5)
-	elif points[-1][1] + playerRadius == screenHeight: 
-		points[-1] = (points[-1][0], points[-1][1] + 5)
-	return points
-
+	newPoints = [0] * len(points)
+	for i in range(len(points)):
+		#If close to line to left
+		direction = (-1, 0)
+		distance, intersectPoint = simulateApproach(points[i], finalLines, direction)
+		if distance == 5:
+			newPoints[i] = intersectPoint#(points[i][0] - 5, points[i][1])
+			continue
+		#If close to line to right 
+		direction = (1, 0)
+		distance, intersectPoint = simulateApproach(points[i], finalLines, direction)
+		if distance == 5:
+			newPoints[i] = intersectPoint#(points[i][0] + 5, points[i][1])
+			continue
+		#If close to line above
+		direction = (0, -1)
+		distance, intersectPoint = simulateApproach(points[i], finalLines, direction)
+		if distance == 5:
+			newPoints[i] = intersectPoint#(points[i][0], points[i][1] - 5)
+			continue
+		#If close to line below 
+		direction = (0, 1)
+		distance, intersectPoint = simulateApproach(points[i], finalLines, direction)
+		if distance == 5:
+			newPoints[i] = intersectPoint#(points[i][0], points[i][1] + 5)
+			continue
+		else:
+			newPoints[i] = points[i]
+	return newPoints
 #Same reasoning for the lines as with fixing the polygon points
 def fixLines(lines):
 	newLines = [0] * len(lines)
@@ -80,6 +112,7 @@ def fixLines(lines):
 		newLines[counter] = (line[0], line[1], newStart, newEnd)
 		counter += 1
 	return newLines
+
 
 #Checks if player has crossed either a line or the sides of the window 
 def checkIfCrossedLine(playerPosition, lines):
@@ -120,7 +153,6 @@ def distanceToAnyLine(playerPosition, lines):
 	distance[2], playerPosition = simulateApproach((x, y), finalLines, direction)
 	direction = (0, 1)
 	distance[3], playerPosition = simulateApproach((x, y), finalLines, direction)
-	print(distance)
 	return 5 in distance
 
 #Main
@@ -140,7 +172,6 @@ lastKeyPressed = None #Used to check for changing directions
 lines = []
 polys = []
 points = [] #List of points that make up the polygons 
-onWall = True
 finalLines = []
 while run:
 	pygame.time.delay(100)
@@ -153,16 +184,16 @@ while run:
 	if keys[pygame.K_LEFT]:
 		if not lastKeyPressed == "left":
 			lineStart = (x, y)
-			points.append((x, y))
+			points.append(fixPoints([(x, y)])[0])
 			direction = (-1, 0)
 			finalLines += fixLines(lines)
 		distance, playerPosition = simulateApproach((x - playerRadius, y), finalLines, direction)
 		if distance < velocity:
-			x = playerPosition[0] + playerRadius
+			x = playerPosition[0] 
+			points.append(fixPoints([(x, y)])[0]) 
+			x += playerRadius
 			print("left blocked")
-			onWall = True
-			points.append((x, y)) 
-
+			
 		else:
 			x -= velocity
 
@@ -174,68 +205,61 @@ while run:
 
 		if not lastKeyPressed == "right":
 			lineStart = (x, y)
-			points.append((x, y))
+			points.append(fixPoints([(x, y)])[0])
 			direction = (1, 0)
 			finalLines += fixLines(lines)
 		distance, playerPosition = simulateApproach((x + playerRadius, y), finalLines, direction)
 		if distance < velocity:
-			x = playerPosition[0] - playerRadius 
+			x = playerPosition[0] 
+			points.append(fixPoints([(x, y)])[0])
+			x -= playerRadius
 			print("right blocked")
-			onWall = True
-			points.append((x, y))
 
 		else:
 			x += velocity
 
-		#If changing direction start a new line and note that this is a vertix 
 		lastKeyPressed = "right"
 
 	#UP KEY
 	elif keys[pygame.K_UP]:
 		if not lastKeyPressed == "up":
 			lineStart = (x, y)
-			points.append((x, y))
+			points.append(fixPoints([(x, y)])[0])
 			direction = (0, -1)
 			finalLines += fixLines(lines)
 		distance, playerPosition = simulateApproach((x, y - playerRadius), finalLines, direction)
 		if distance < velocity:
-			y = playerPosition[1] + playerRadius
+			y = playerPosition[1] 
+			points.append(fixPoints([(x, y)])[0]) 
+			y += playerRadius
 			print("up blocked")
-			onWall = True
-			points.append((x, y)) 
 
 		else:
 			y -= velocity
 
-		#If changing direction start a new line and note that this is a vertix 
 		lastKeyPressed = "up"
 
 	#DOWN KEY
 	elif keys[pygame.K_DOWN]:
 		if not lastKeyPressed == "down":
 			lineStart = (x, y)
-			points.append((x, y))
+			points.append(fixPoints([(x, y)])[0])
 			direction = (0, 1)
 			finalLines += fixLines(lines)
 		distance, playerPosition = simulateApproach((x, y + playerRadius), finalLines, direction)
 		if distance < velocity:
-			y = playerPosition[1] - playerRadius 
+			y = playerPosition[1] 
+			points.append(fixPoints([(x, y)])[0])
+			y -= playerRadius
 			print("down blocked")
-			onWall = True
-			points.append((x, y))
 		else:
 			y += velocity 
-		#If changing direction start a new line and note that this is a vertix 
 		lastKeyPressed = "down"
 
 	win.fill((0,0,0))
 	pygame.draw.circle(win, (255, 0, 0), (x, y), playerRadius)
 	#If not on wall append line behind us
-	if not distanceToAnyLine((x, y), finalLines): #Off wall 
-		onWall = False
-	else: #On wall
-		onWall = True
-	if not onWall:
+	if not distanceToAnyLine((x, y), finalLines):
 		try:
 			lines.pop()
 		except: 
@@ -245,10 +269,10 @@ while run:
 	else:
 		onWall = True
 		if len(points) > 1:
-			points.append((x, y))
+			points.append(fixPoints([(x, y)])[0])
 			lines.append((win, (255, 255, 255), lineStart, (x, y)))
-			points = fixPoints(points)
-			points = getCorrectPoints(points)
+			points = getPolyPoints(points, finalLines, lastKeyPressed)
+			#points = getCorrectPoints(points)
 			if len(points) > 3:
 				polys.append((win, (0, 255, 0), points))
 		points = []
@@ -265,6 +289,4 @@ while run:
 	pygame.display.update()
 
 pygame.quit()
-
-
 
