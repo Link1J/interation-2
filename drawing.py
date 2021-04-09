@@ -114,7 +114,7 @@ class Drawing:
     def qix_update(self, pos: Vector2, facing: float) -> None:
         for i in range(len(self.prev_qix) - 1):
             self.prev_qix[i] = self.prev_qix[i + 1]
-        self.prev_qix[-1] = (pos, facing, Color(255, 0, 0))
+        self.prev_qix[-1] = (Vector2(pos), facing, Color(255, 0, 0))
 
     def qix(self, pos: Vector2, facing: float, size: float) -> None:
         """

@@ -27,8 +27,8 @@ class Qix:
         if pos.y > 1 - 0:
             pos.y = 0
 
-    def angle(self, mov: Vector2) -> float:
-        return math.atan2(mov.y, mov.x) * (180 / math.pi)
+    def angle(self) -> float:
+        return math.atan2(self.y_vel, self.x_vel) * (180 / math.pi)
 
     def draw(self, size: float) -> None:
         """
@@ -36,10 +36,9 @@ class Qix:
         :param size: Size of the qix
         :return: None
         """
-        self.qix_pos = self.qix_pos + self.qix_mov
+        self.qix_pos = self.qix_pos
         self.bound(self.qix_pos)
-        self.qix_mov.rotate_ip(10)  # random.randint(0, 20))
-        drawing.qix(self.qix_pos, self.angle(self.qix_mov), size)
+        drawing.qix(self.qix_pos, self.angle(), size)
 
     def move(self) -> None:
         """
