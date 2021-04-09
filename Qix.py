@@ -44,7 +44,7 @@ class Qix:
         self.qix_lines = drawing.get_qix_lines()
         self.player_lines = drawing.get_player_lines()
 
-    def collision(self):
+    def collision(self) -> bool:
         """
         Detects collision between qix and the player(Diamond)
         :return: True if collision happens
@@ -61,7 +61,7 @@ class Qix:
                 if collide:
                     return collide
 
-    def check_collision(self, x_val, y_val, p_line, q_line):
+    def check_collision(self, x_val, y_val, p_line, q_line) -> bool:
         collision_p = False
         collision_q = False
         bigpx, smallpx = max(p_line[0][0], p_line[1][0]), min(p_line[0][0], p_line[1][0])
@@ -112,7 +112,7 @@ class Qix:
         y_int = float(line[0][1] - slope * line[0][0])
         return slope, y_int
 
-    def vertical_line_collision(self, x_val, y_start, y_end, line2):
+    def vertical_line_collision(self, x_val, y_start, y_end, line2) -> bool:
         """
         Checks for collision when the line is vertical and thus cannot calculate slope.
         :param x_val: x_value of the vertical line

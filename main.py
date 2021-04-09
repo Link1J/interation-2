@@ -369,9 +369,9 @@ def game_update() -> None:
         points = []
 
     qix.draw(0.1)
-    collided = qix.collision()
-    if collided:
-        print("collision occurred!")
+    qix_collided = qix.collision()
+    if qix_collided:
+        print("Qix-player collision occurred!")
     qix.move()
 
     drawing.lines(polys, lines)
@@ -379,6 +379,14 @@ def game_update() -> None:
 
     sparx1.draw()
     sparx2.draw()
+
+    # Sparx detects collision with player
+    sparx_collided = False
+    if sparx1.collision() or sparx2.collision():
+        sparx_collided = True
+    if sparx_collided:
+        print("Sparx-player collision!")
+
     sparx1.move()
     sparx2.move()
 

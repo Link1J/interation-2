@@ -52,6 +52,7 @@ class Drawing:
         self.score_value = 0
         self.filled_value = 0
         self.required_value = 0
+        self.player_pos = []
         self.player_lines = []
         self.qix_lines = []
 
@@ -155,6 +156,7 @@ class Drawing:
         :param size: Size of object
         :return: None
         """
+        self.player_pos = pos
         delta = Vector2(0, size)
         draw_color = (128, 128, 128)
 
@@ -190,6 +192,9 @@ class Drawing:
 
     def get_player_lines(self):
         return self.player_lines
+
+    def get_player_pos(self):
+        return self.player_pos
 
     def sparx(self, pos: Vector2, facing: float, size: float) -> None:
         """

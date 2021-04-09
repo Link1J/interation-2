@@ -9,6 +9,7 @@ class Sparx:
 
     def __init__(self, x: float, y: float, vel: float, reverse: bool) -> None:
         self.win = None                                 # Window(screen) which the sparx is drawn on.
+        self.radius = 0.02                              # Radius of the Sparx
         self.x, self.y = x, y                           # x and y value of the Sparx.
         self.vel = vel                                  # velocity of the Sparx.
         self.x_vel, self.y_vel = vel, 0                 # x and y velocity of the Sparx.
@@ -16,6 +17,7 @@ class Sparx:
         self.cur_line = None                            # Current line that Sparx is moving along.
         self.corner = False                             # True if the Sparx has reached the end of the line.
         self.reverse = reverse                          # if self.reverse = True => Sparx moves to the left at the start
+        self.player_lines = None                        # List containing starting point and end point of 4 lines of player(Diamond)
         self.setup_lines()                              # Initializing the lines that the sparx move through.
 
     def setup_lines(self) -> None:
@@ -42,7 +44,20 @@ class Sparx:
         This is done so that Sparx object contains the method 'draw'
         :return: None
         """
-        drawing.sparx(Vector2(self.x, self.y), 0, 0.02)
+        drawing.sparx(Vector2(self.x, self.y), 0, self.radius)
+        self.player_lines = drawing.get_player_lines()
+
+    def collision(self) -> bool:
+        """
+        Detects the collision between sparx and the player.
+        :return: True if collision occurs.
+        """
+        collided = False
+        player_pos = drawing.get_player_pos()
+        if self.x - self.radius <= player_pos[0] <= self.x + self.radius:
+            if self.y - self.radius <= player_pos[1] <= self.y + self.radius:
+                collided = True
+        return collided
 
     def move(self) -> None:
         """
