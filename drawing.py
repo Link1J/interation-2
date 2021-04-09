@@ -45,7 +45,8 @@ class Drawing:
 
     def __init__(self) -> None:
         self.player_shape = PlayerShape.Diamond
-        self.prev_qix = [(Vector2(-100, -100), 0., Color(0,255,0)) for _ in range(10)]
+        self.prev_qix = [(Vector2(-100, -100), 0., Color(0, 255, 0))
+                         for _ in range(10)]
         self.surface = None
         self.size = (0, 0)
         self.score_value = 0
@@ -241,6 +242,26 @@ class Drawing:
         rect = self.score.get_rect()
         rect.move_ip(prev_rect.x, prev_rect.bottom)
         self.surface.blit(self.score, rect)
+
+    def lines(self, polys : List[List[Tuple[int, int]]], lines : List[Tuple[Tuple[int, int], Tuple[int, int]]]):
+        # Draw polygons
+        for poly in polys:
+            temp = poly.copy()
+
+            for i in range(len(temp)):
+                temp[i] = (temp[i][0] / 500 * self.scale + self.offset[0], temp[i][1] / 500 * self.scale + self.offset[1])
+
+            pygame.draw.polygon(self.surface, (0, 255, 0), temp)
+            for i in range(-1, len(temp) - 1):
+                aaline(self.surface, (255, 255, 255), temp[i], temp[i + 1])
+
+        for line in lines:
+            startx = line[0][0] / 500 * self.scale + self.offset[0]
+            starty = line[0][1] / 500 * self.scale + self.offset[1]
+            endx = line[1][0] / 500 * self.scale + self.offset[0]
+            endy = line[1][1] / 500 * self.scale + self.offset[1]
+            aaline(self.surface, (255, 255, 255),
+                   (startx, starty), (endx, endy))
 
 
 drawing = Drawing()
