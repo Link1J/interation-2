@@ -52,6 +52,8 @@ class Drawing:
         self.score_value = 0
         self.filled_value = 0
         self.required_value = 0
+        self.player_lines = []
+        self.qix_lines = []
 
     def set_surface(self, surface: Surface) -> None:
         size = surface.get_size()
@@ -134,12 +136,16 @@ class Drawing:
         start = (pos + offset) * self.scale + Vector2(self.offset)
         end = (pos - offset) * self.scale + Vector2(self.offset)
         pygame.draw.aaline(self.surface, draw_color, start, end, 2)
-
+        self.qix_lines = [[start, end]]
         for (pos, facing, draw_color) in self.prev_qix:
             offset = delta.rotate(facing)
             start = (pos + offset) * self.scale + Vector2(self.offset)
             end = (pos - offset) * self.scale + Vector2(self.offset)
             pygame.draw.aaline(self.surface, draw_color, start, end, 2)
+            self.qix_lines.append([start, end])
+
+    def get_qix_lines(self):
+        return self.qix_lines
 
     def player(self, pos: Vector2, facing: float, size: float) -> None:
         """
@@ -172,11 +178,18 @@ class Drawing:
             b = (pos - delta.rotate(180)) * self.scale + Vector2(self.offset)
             l = (pos - delta.rotate(270)) * self.scale + \
                 Vector2(self.offset) + Vector2(1/1017, 0) * self.scale
-
+            self.player_lines = []
             aaline(self.surface, draw_color, t, r, 2)
             aaline(self.surface, draw_color, r, b, 2)
             aaline(self.surface, draw_color, b, l, 2)
             aaline(self.surface, draw_color, l, t, 2)
+            self.player_lines.append([t, r])
+            self.player_lines.append([r, b])
+            self.player_lines.append([b, l])
+            self.player_lines.append([l, t])
+
+    def get_player_lines(self):
+        return self.player_lines
 
     def sparx(self, pos: Vector2, facing: float, size: float) -> None:
         """

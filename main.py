@@ -369,6 +369,9 @@ def game_update() -> None:
         points = []
 
     qix.draw(0.1)
+    collided = qix.collision()
+    if collided:
+        print("collision occurred!")
     qix.move()
 
     drawing.lines(polys, lines)
